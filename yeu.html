@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Thiên Hà Tình Yêu — Thư</title>
+  <style>
+    :root{--bg1:#0f172a;--bg2:#001e3c;--card:#071032}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Helvetica Neue',Arial}
+    body{background:radial-gradient(circle at 10% 10%, rgba(255,255,255,0.03), transparent 10%), linear-gradient(180deg,var(--bg1),var(--bg2));
+      color:#e6eef8;display:flex;align-items:center;justify-content:center;padding:32px}
+    .card{width:100%;max-width:720px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);border-radius:16px;padding:28px;box-shadow:0 10px 40px rgba(2,6,23,0.6);border:1px solid rgba(255,255,255,0.03)}
+    h1{margin:0 0 6px;font-size:22px;letter-spacing:0.6px}
+    .sub{opacity:0.8;font-size:13px;margin-bottom:18px}
+    .letter{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:20px;border-radius:12px;border:1px dashed rgba(255,255,255,0.03);line-height:1.7}
+    .meta{display:flex;gap:12px;margin-bottom:10px}
+    .fromto{font-weight:600}
+    .controls{display:flex;gap:10px;margin-top:16px}
+    button{background:linear-gradient(90deg,#ff5874,#ff8a66);border:none;padding:10px 14px;border-radius:10px;color:white;cursor:pointer;font-weight:600}
+    .ghost{background:transparent;border:1px solid rgba(255,255,255,0.08);color:inherit}
+    .note{font-size:13px;opacity:0.8;margin-top:10px}
+    .hearts{position:fixed;right:18px;bottom:18px;display:flex;flex-direction:column;gap:8px}
+    .heart{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,0.03);backdrop-filter: blur(4px)}
+    .heart:after{content:'❤';color:#ff8aa0;font-size:18px}
+    footer{margin-top:16px;font-size:13px;opacity:0.8}
+    @media (max-width:520px){.card{padding:18px}}
+  </style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>Thiên Hà Tình Yêu</h1>
+    <div class="sub">Một lá thư ấm áp gửi từ trái tim — Tùy chỉnh, xem trước và gửi.</div>
+
+    <div class="meta">
+      <div class="fromto">Người gửi: <strong id="sender">Lê Đình Mạnh</strong></div>
+      <div class="fromto">Người nhận: <strong id="recipient">em bé Nguyệt xinh gái</strong></div>
+    </div>
+
+    <div class="letter" id="letter">
+      <p>Gửi người con gái anh yêu:</p>
+
+      <p>Anh không thể bên em mỗi ngày, nhưng anh hứa sẽ yêu em hơn mỗi ngày, mỗi giờ, mỗi phút, mỗi giây.... Không lúc nào là ko nhớ về em. Thương em,.</p>
+
+      <p>Nhạc: <em>một đời</em></p>
+    </div>
+
+    <div class="controls">
+      <button id="previewEmail">Mở trình gửi thư</button>
+      <button id="copyText" class="ghost">Sao chép nội dung</button>
+      <button id="download" class="ghost">Tải file HTML</button>
+    </div>
+
+    <div class="note">Tip: nút "Mở trình gửi thư" sẽ mở ứng dụng email mặc định trên máy với tiêu đề và nội dung đã chèn sẵn. Nếu muốn gửi tự động (server-side), mình có thể giúp tạo phiên bản Node.js hoặc Python.</div>
+
+    <div style="margin-top:14px">
+      <!-- Thay src bằng đường dẫn file âm nhạc của bạn (ví dụ: ./audio/mot-doi.mp3) -->
+      <audio id="audio" controls loop>
+        <source src="audio/mot-doi.mp3" type="audio/mpeg">
+        Trình duyệt không hỗ trợ thẻ audio.
+      </audio>
+    </div>
+
+    <footer>Chỉnh sửa trực tiếp: thay tên người gửi/nhận trong HTML, hoặc bấm nút để mở email.</footer>
+  </div>
+
+  <div class="hearts">
+    <div class="heart"></div>
+    <div class="heart"></div>
+    <div class="heart"></div>
+  </div>
+
+<script>
+  const sender = document.getElementById('sender').textContent.trim();
+  const recipient = document.getElementById('recipient').textContent.trim();
+  const letterEl = document.getElementById('letter');
+
+  function buildMailto(){
+    const subject = `Thiên Hà Tình Yêu — từ ${sender}`;
+    // build plain-text body preserving line breaks
+    const body = Array.from(letterEl.querySelectorAll('p')).map(p => p.textContent.trim()).join('\n\n');
+    const mailto = `mailto:?to=${encodeURIComponent(recipient)}&subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    return mailto;
+  }
+
+  document.getElementById('previewEmail').addEventListener('click', ()=>{
+    window.location.href = buildMailto();
+  });
+
+  document.getElementById('copyText').addEventListener('click', async ()=>{
+    const text = Array.from(letterEl.querySelectorAll('p')).map(p=>p.textContent.trim()).join('\n\n');
+    try{
+      await navigator.clipboard.writeText(text);
+      alert('Đã sao chép nội dung thư vào clipboard.');
+    }catch(e){
+      alert('Không thể sao chép — vui lòng sao chép thủ công.');
+    }
+  });
+
+  document.getElementById('download').addEventListener('click', ()=>{
+    const blob = new Blob([document.documentElement.outerHTML], {type:'text/html'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'thien-ha-tinh-yeu.html';
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  });
+</script>
+</body>
+</html>
